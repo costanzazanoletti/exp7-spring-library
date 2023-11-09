@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:insert="fragments/resources :: headResources('Book List')"></head>
+<body>
+<nav th:replace="fragments/navbar :: topNavbar('books')"></nav>
+<div class="container">
+  <h1>Book List</h1>
+  <hr>
+  <table class="table">
+    <thead>
+    <tr>
+      <th>Title</th>
+      <th>Authors</th>
+      <th>Publisher</th>
+      <th>ISBN</th>
+      <th>Year of publication</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="book : ${bookList}" th:object="${book}">
+      <td th:text="*{title}"></td>
+      <td th:text="*{authors}"></td>
+      <td th:text="*{publisher}"></td>
+      <td th:text="*{isbn}"></td>
+      <td th:text="*{year}"></td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+</body>
+</html>
