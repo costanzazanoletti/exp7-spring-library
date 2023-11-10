@@ -4,7 +4,23 @@
 <body>
 <nav th:replace="fragments/navbar :: topNavbar('books')"></nav>
 <div class="container">
-  <h1>Book List</h1>
+  <div class="d-flex align-items-center justify-content-between">
+    <h1>Book List</h1>
+    <form th:action="@{/books}" method="GET">
+      <div class="input-group">
+        <!-- input precaricato leggendo il parametro search della request -->
+        <input
+            type="text"
+            placeholder="Search by title/authors"
+            class="form-control" name="search"
+            th:value="${param.search}"
+        >
+        <button class="btn btn-primary" type="submit">Search</button>
+      </div>
+    
+    </form>
+  </div>
+  
   <hr>
   <table class="table">
     <thead>
@@ -14,6 +30,7 @@
       <th>Publisher</th>
       <th>ISBN</th>
       <th>Year of publication</th>
+      <th></th>
     </tr>
     </thead>
     <tbody>
@@ -23,6 +40,9 @@
       <td th:text="*{publisher}"></td>
       <td th:text="*{isbn}"></td>
       <td th:text="*{year}"></td>
+      <td>
+        <a th:href="@{/books/show/{id}(id=*{id})}" title="details"><i class="fa-solid fa-book"></i></a>
+      </td>
     </tr>
     </tbody>
   </table>
