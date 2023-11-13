@@ -1,5 +1,6 @@
 package com.experis.course.springlibrary.model;
 
+import com.experis.course.springlibrary.validation.YearPastOrPresent;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -7,7 +8,11 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
+import org.hibernate.annotations.CreationTimestamp;
 
 @Entity
 @Table(name = "books")
@@ -17,17 +22,28 @@ public class Book {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Integer id;
 
+  @NotBlank(message = "Title must not be blank")
+  @Size(max = 255, message = "Length must be less than 255")
   private String title;
 
+  @NotBlank(message = "Authors must not be blank")
+  @Size(max = 255, message = "Length must be less than 255")
   private String authors;
 
+  @NotBlank(message = "Publisher must not be blank")
+  @Size(max = 255, message = "Length must be less than 255")
   private String publisher;
 
-  @Column(length = 13, nullable = false)
+  @NotBlank(message = "ISBN must not be blank")
+  @Size(max = 13, message = "Length must be less than 255")
+  @Column(length = 13, nullable = false, unique = true)
   private String isbn;
 
+  @NotNull(message = "Year must not be null")
+  @YearPastOrPresent
   private Integer year;
 
+  @CreationTimestamp
   private LocalDateTime createdAt;
 
   @Lob
