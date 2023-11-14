@@ -1,9 +1,10 @@
 package com.experis.course.springlibrary.controller;
 
+import com.experis.course.springlibrary.exceptions.BookNotFoundException;
+import com.experis.course.springlibrary.exceptions.ISBNUniqueException;
 import com.experis.course.springlibrary.model.Book;
-import com.experis.course.springlibrary.repository.BookRepository;
+import com.experis.course.springlibrary.service.BookService;
 import jakarta.validation.Valid;
-import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -26,48 +27,28 @@ public class BookController {
 
   // attributi
   @Autowired
-  private BookRepository bookRepository;
+  private BookService bookService;
 
 
   // metodo che mostra la lista di tutti i libri
   @GetMapping
   public String index(@RequestParam Optional<String> search,
       Model model) {
-    List<Book> bookList;
-
-    if (search.isPresent()) {
-      // se il parametro di ricerca è presente filtro la lista dei libri
-      bookList = bookRepository.findByTitleContainingIgnoreCaseOrAuthorsContainingIgnoreCase(
-          search.get(),
-          search.get());
-    } else {
-      // altrimenti prendo tutti i libri non filtrati
-      // bookRepository recupera da database la lista di tutti i libri
-      bookList = bookRepository.findAll();
-    }
-
     // passo al template la lista di libri
-    model.addAttribute("bookList", bookList);
+    model.addAttribute("bookList", bookService.getBookList(search));
     return "books/list";
   }
 
   // metodo che mostra i dettagli di un libro preso per id
   @GetMapping("/show/{id}")
   public String show(@PathVariable Integer id, Model model) {
-    Optional<Book> result = bookRepository.findById(id);
-    // verifico se il risultato è presente
-    if (result.isPresent()) {
-      // passo al template l'oggetto Book
-      model.addAttribute("book", result.get());
+    try {
+      Book book = bookService.getBookById(id);
+      model.addAttribute("book", book);
       return "books/show";
-    } else {
-      // se non ho trovato il libro sollevo un'eccezione
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "book with id " + id + " not found");
+    } catch (BookNotFoundException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
     }
-/*    model.addAttribute("book", bookRepository.findById(id).orElseThrow(
-        () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-            "book with id " + id + " not found")));
-    return "books/show";*/
   }
 
   // metodo che mostra il form di creazione del book
@@ -80,47 +61,35 @@ public class BookController {
   @PostMapping("/create")
   public String doCreate(@Valid @ModelAttribute("book") Book formBook,
       BindingResult bindingResult) {
-
-    // valido che l'anno non sia nel futuro
-    /*if (formBook.getYear() != null && formBook.getYear() > LocalDate.now().getYear()) {
-      // aggiungo un errore a bindingResult
-      bindingResult.addError(new FieldError("book", "year", formBook.getYear(), false, null, null,
-          "Year must be present or past"));
-    }*/
     // validare che i dati siano corretti
     if (bindingResult.hasErrors()) {
       // ci sono errori, devo ricaricare il form
       return "books/form";
     }
-    // setto il timestamp di creazione
-    // formBook.setCreatedAt(LocalDateTime.now());
     // salvo il libro su database
-    Book savedBook = null;
     try {
-      savedBook = bookRepository.save(formBook);
-    } catch (RuntimeException e) {
+      Book savedBook = bookService.createBook(formBook);
+      return "redirect:/books/show/" + savedBook.getId();
+    } catch (ISBNUniqueException e) {
       // aggiungo un errore di validazione per isbn
-      bindingResult.addError(new FieldError("book", "isbn", formBook.getIsbn(), false, null, null,
+      bindingResult.addError(new FieldError("book", "isbn", e.getMessage(), false, null, null,
           "ISBN must be unique"));
       // ti rimando alla pagina col form
       return "books/form";
     }
-    return "redirect:/books/show/" + savedBook.getId();
   }
 
   // metodo che mostra la pagina di modifica di un libro
   @GetMapping("/edit/{id}")
   public String edit(@PathVariable Integer id, Model model) {
-    // a partire dall'id recupero i dati del libro
-    Optional<Book> result = bookRepository.findById(id);
-    if (result.isPresent()) {
+    try {
       // aggiungo il book come attributo del Model
-      model.addAttribute("book", result.get());
+      model.addAttribute("book", bookService.getBookById(id));
       // proseguo a restituire la pagina di modifica
       return "/books/form";
-    } else {
+    } catch (BookNotFoundException e) {
       // sollevo un'eccesione con HttpStatus 404
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Book with id " + id + " not found");
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
     }
   }
 
@@ -133,30 +102,26 @@ public class BookController {
       // se ci sono errori ricarico la pagina col form
       return "/books/form";
     }
-    // recupero il libro che voglio modificare da db
-    Book bookToEdit = bookRepository.findById(id)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-    // se lo trovo modifico puntualmente solo gli attributi che erano campi del form
-    bookToEdit.setTitle(formBook.getTitle());
-    bookToEdit.setAuthors(formBook.getAuthors());
-    bookToEdit.setPublisher(formBook.getPublisher());
-    bookToEdit.setYear(formBook.getYear());
-    bookToEdit.setSynopsis(formBook.getSynopsis());
-    // se non ci sono errori salvo il libro
-    Book savedBook = bookRepository.save(bookToEdit);
-    return "redirect:/books/show/" + savedBook.getId();
+    try {
+      Book savedBook = bookService.editBook(formBook);
+      return "redirect:/books/show/" + savedBook.getId();
+    } catch (BookNotFoundException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+    }
   }
 
   // metodo per eliminare un libro da database
   @PostMapping("/delete/{id}")
   public String delete(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
     // recupero il libro con quell'id
-    Book bookToDelete = bookRepository.findById(id)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-    // se esiste lo elimino
-    bookRepository.deleteById(id);
-    redirectAttributes.addFlashAttribute("message",
-        "Book " + bookToDelete.getTitle() + " deleted!");
-    return "redirect:/books";
+    try {
+      Book bookToDelete = bookService.getBookById(id);
+      bookService.deleteBook(id);
+      redirectAttributes.addFlashAttribute("message",
+          "Book " + bookToDelete.getTitle() + " deleted!");
+      return "redirect:/books";
+    } catch (BookNotFoundException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+    }
   }
 }
