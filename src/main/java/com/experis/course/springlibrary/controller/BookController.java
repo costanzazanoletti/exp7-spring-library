@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/books")
@@ -73,7 +74,7 @@ public class BookController {
   @GetMapping("/create")
   public String create(Model model) {
     model.addAttribute("book", new Book());
-    return "books/create";
+    return "books/form";
   }
 
   @PostMapping("/create")
@@ -89,7 +90,7 @@ public class BookController {
     // validare che i dati siano corretti
     if (bindingResult.hasErrors()) {
       // ci sono errori, devo ricaricare il form
-      return "books/create";
+      return "books/form";
     }
     // setto il timestamp di creazione
     // formBook.setCreatedAt(LocalDateTime.now());
@@ -102,8 +103,60 @@ public class BookController {
       bindingResult.addError(new FieldError("book", "isbn", formBook.getIsbn(), false, null, null,
           "ISBN must be unique"));
       // ti rimando alla pagina col form
-      return "books/create";
+      return "books/form";
     }
     return "redirect:/books/show/" + savedBook.getId();
+  }
+
+  // metodo che mostra la pagina di modifica di un libro
+  @GetMapping("/edit/{id}")
+  public String edit(@PathVariable Integer id, Model model) {
+    // a partire dall'id recupero i dati del libro
+    Optional<Book> result = bookRepository.findById(id);
+    if (result.isPresent()) {
+      // aggiungo il book come attributo del Model
+      model.addAttribute("book", result.get());
+      // proseguo a restituire la pagina di modifica
+      return "/books/form";
+    } else {
+      // sollevo un'eccesione con HttpStatus 404
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Book with id " + id + " not found");
+    }
+  }
+
+  // metodo che riceve il submit del form di edit e salva il libro
+  @PostMapping("/edit/{id}")
+  public String doEdit(@PathVariable Integer id, @Valid @ModelAttribute("book") Book formBook,
+      BindingResult bindingResult) {
+    // valido il libro
+    if (bindingResult.hasErrors()) {
+      // se ci sono errori ricarico la pagina col form
+      return "/books/form";
+    }
+    // recupero il libro che voglio modificare da db
+    Book bookToEdit = bookRepository.findById(id)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    // se lo trovo modifico puntualmente solo gli attributi che erano campi del form
+    bookToEdit.setTitle(formBook.getTitle());
+    bookToEdit.setAuthors(formBook.getAuthors());
+    bookToEdit.setPublisher(formBook.getPublisher());
+    bookToEdit.setYear(formBook.getYear());
+    bookToEdit.setSynopsis(formBook.getSynopsis());
+    // se non ci sono errori salvo il libro
+    Book savedBook = bookRepository.save(bookToEdit);
+    return "redirect:/books/show/" + savedBook.getId();
+  }
+
+  // metodo per eliminare un libro da database
+  @PostMapping("/delete/{id}")
+  public String delete(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
+    // recupero il libro con quell'id
+    Book bookToDelete = bookRepository.findById(id)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    // se esiste lo elimino
+    bookRepository.deleteById(id);
+    redirectAttributes.addFlashAttribute("message",
+        "Book " + bookToDelete.getTitle() + " deleted!");
+    return "redirect:/books";
   }
 }
