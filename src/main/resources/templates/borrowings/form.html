@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:with="isEdit=${borrowing.id != null}">
+<head
+    th:insert="fragments/resources :: headResources(${isEdit ? 'Edit Borrowing' : 'Create Borrowing'})"></head>
+<body>
+<nav th:replace="fragments/navbar :: topNavbar('books')"></nav>
+<div class="container">
+  <h1 th:text="${isEdit ? 'Edit Borrowing' : 'Create Borrowing'}"></h1>
+  <h2 class="text-muted" th:text="${borrowing.book.title}"></h2>
+  <hr>
+  <form
+      th:with="actionUrl=${isEdit ? '/borrowings/edit/'+borrowing.id : '/borrowings/create'}"
+      id="borrowing-form"
+      th:action="@{${actionUrl}}"
+      method="POST"
+      th:object="${borrowing}"
+      class="row"
+  >
+    <!-- hidden fields -->
+    <input type="hidden" th:field="*{book}">
+    <div class="col-6"
+         th:insert="fragments/components :: formField('date', 'Start Date', 'startDate')"></div>
+    <div class="col-6"
+         th:insert="fragments/components :: formField('date', 'Expire Date', 'expireDate')"></div>
+    <div class="col-6"
+         th:insert="fragments/components :: formField('date', 'Return Date', 'returnDate')"></div>
+    <div class="col-12">
+      <label for="note" class="form-label">Note</label>
+      <textarea class="form-control" id="note" rows="5" th:field="*{note}"></textarea>
+    </div>
+    <!-- actions -->
+    <div class="col-12">
+      <button class="btn btn-primary" type="submit">Save</button>
+      <a th:href="@{/books/show/{bookId}(bookId=*{book.id})}" class="btn btn-primary">Cancel</a>
+    </div>
+  </form>
+</div>
+</body>
+</html>

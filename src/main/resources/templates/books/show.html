@@ -7,18 +7,69 @@
   <h1 th:text="*{title}"></h1>
   <h2 class="text-muted" th:text="|written by *{authors}|"></h2>
   <hr>
-  <dl>
-    <dt>Publisher</dt>
-    <dd th:text="*{publisher}"></dd>
-    <dt>ISBN</dt>
-    <dd th:text="*{isbn}"></dd>
-    <dt>Year of publication</dt>
-    <dd th:text="*{year}"></dd>
-    <dt>Added to catalog</dt>
-    <dd th:text="*{#temporals.format(createdAt, 'yyyy-MM-dd')}"></dd>
-    <dt>Synopsis</dt>
-    <dd th:text="*{#strings.defaultString(synopsis,'N.D.')}"></dd>
-  </dl>
+  <section>
+    <dl>
+      <dt>Publisher</dt>
+      <dd th:text="*{publisher}"></dd>
+      <dt>ISBN</dt>
+      <dd th:text="*{isbn}"></dd>
+      <dt>Year of publication</dt>
+      <dd th:text="*{year}"></dd>
+      <dt>Added to catalog</dt>
+      <dd th:text="*{#temporals.format(createdAt, 'yyyy-MM-dd')}"></dd>
+      <dt>Synopsis</dt>
+      <dd th:text="*{#strings.defaultString(synopsis,'N.D.')}"></dd>
+      <dt>Number of copies</dt>
+      <dd th:text="*{numberOfCopies}"></dd>
+      <dt>Available copies</dt>
+      <dd th:text="*{availableCopies}"></dd>
+    </dl>
+  </section>
+  <section>
+    
+    <h2>Borrowings
+      <a
+          th:if="*{availableCopies > 0}"
+          th:href="@{/borrowings/create(bookId=*{id})}"
+      ><i class="fa-solid fa-circle-plus"></i></a>
+      <button
+          th:unless="*{availableCopies > 0}"
+          class="btn btn-primary"
+          disabled>
+        <i class="fa-solid fa-circle-plus"></i>
+      </button>
+    </h2>
+    
+    <table class="table">
+      <thead>
+      <tr>
+        <th>Start date</th>
+        <th>Expire date</th>
+        <th>Return date</th>
+        <th>Note</th>
+        <th></th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="borrowing : *{borrowings}" th:object="${borrowing}">
+        <td th:text="*{startDate}"></td>
+        <td th:text="*{expireDate}"></td>
+        <td th:text="*{returnDate}"></td>
+        <td th:text="*{note}"></td>
+        <td>
+          <a
+              class="btn btn-primary"
+              th:href="@{/borrowings/edit/{id}(id=*{id})}" title="edit">
+            <i class="fa-solid fa-pen-to-square"></i>
+          </a>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+    <div th:if="*{borrowings.size() == 0}" class="alert alert-info">The list is empty</div>
+  </section>
+  
+  
   <div class="mt-2">
     <a th:href="@{/books}" class="btn btn-primary">Back to list</a>
   </div>
