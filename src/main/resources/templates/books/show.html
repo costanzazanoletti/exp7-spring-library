@@ -4,6 +4,8 @@
 <body>
 <nav th:replace="fragments/navbar :: topNavbar('books')"></nav>
 <div class="container" th:object="${book}">
+  <!-- message da redirectAttributes -->
+  <div th:replace="fragments/components :: message"></div>
   <h1 th:text="*{title}"></h1>
   <h2 class="text-muted" th:text="|written by *{authors}|"></h2>
   <hr>
@@ -56,12 +58,17 @@
         <td th:text="*{expireDate}"></td>
         <td th:text="*{returnDate}"></td>
         <td th:text="*{note}"></td>
-        <td>
+        <td class="d-flex">
           <a
-              class="btn btn-primary"
+              class="btn btn-primary me-1"
               th:href="@{/borrowings/edit/{id}(id=*{id})}" title="edit">
             <i class="fa-solid fa-pen-to-square"></i>
           </a>
+          <form method="POST" th:action="@{/borrowings/delete/{id}(id=*{id})}"
+                onsubmit="return confirm('Are you sure?')">
+            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-trash-can"></i>
+            </button>
+          </form>
         </td>
       </tr>
       </tbody>

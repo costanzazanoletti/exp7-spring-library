@@ -38,4 +38,8 @@ public class BorrowingService {
             () -> new BorrowingNotFoundException("Borrowing with id " + id + " not found")
         );
   }
+
+  public void deleteBorrowing(Borrowing borrowing) {
+    borrowingRepository.delete(borrowing);
+  }
 }

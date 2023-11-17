@@ -55,7 +55,7 @@ public class Book {
 
   @Min(0)
   private Integer numberOfCopies;
-  @OneToMany(mappedBy = "book")
+  @OneToMany(mappedBy = "book", orphanRemoval = true)
   private List<Borrowing> borrowings = new ArrayList<>();
 
   public Integer getId() {
@@ -150,4 +150,5 @@ public class Book {
     }
     return numberOfCopies - notReturnedBorrowings;
   }
+  
 }

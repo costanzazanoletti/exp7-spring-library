@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/borrowings")
@@ -70,5 +71,19 @@ public class BorrowingController {
     Borrowing savedBorrowing = borrowingService.saveBorrowing(formBorrowing);
     // redirect
     return "redirect:/books/show/" + formBorrowing.getBook().getId();
+  }
+
+  @PostMapping("/delete/{id}")
+  public String delete(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
+    try {
+      // cancello il borrowing
+      Borrowing borrowingToDelete = borrowingService.getBorrowing(id);
+      borrowingService.deleteBorrowing(borrowingToDelete);
+      // faccio la redirect alla pagina di dettaglio del book
+      redirectAttributes.addFlashAttribute("message", "Borrowing deleted!");
+      return "redirect:/books/show/" + borrowingToDelete.getBook().getId();
+    } catch (BorrowingNotFoundException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+    }
   }
 }
