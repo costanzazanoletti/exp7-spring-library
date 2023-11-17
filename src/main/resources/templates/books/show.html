@@ -9,23 +9,32 @@
   <h1 th:text="*{title}"></h1>
   <h2 class="text-muted" th:text="|written by *{authors}|"></h2>
   <hr>
-  <section>
-    <dl>
-      <dt>Publisher</dt>
-      <dd th:text="*{publisher}"></dd>
-      <dt>ISBN</dt>
-      <dd th:text="*{isbn}"></dd>
-      <dt>Year of publication</dt>
-      <dd th:text="*{year}"></dd>
-      <dt>Added to catalog</dt>
-      <dd th:text="*{#temporals.format(createdAt, 'yyyy-MM-dd')}"></dd>
-      <dt>Synopsis</dt>
-      <dd th:text="*{#strings.defaultString(synopsis,'N.D.')}"></dd>
-      <dt>Number of copies</dt>
-      <dd th:text="*{numberOfCopies}"></dd>
-      <dt>Available copies</dt>
-      <dd th:text="*{availableCopies}"></dd>
-    </dl>
+  <section class="row">
+    <div class="col-8">
+      <dl>
+        <dt>Publisher</dt>
+        <dd th:text="*{publisher}"></dd>
+        <dt>ISBN</dt>
+        <dd th:text="*{isbn}"></dd>
+        <dt>Year of publication</dt>
+        <dd th:text="*{year}"></dd>
+        <dt>Added to catalog</dt>
+        <dd th:text="*{#temporals.format(createdAt, 'yyyy-MM-dd')}"></dd>
+        <dt>Synopsis</dt>
+        <dd th:text="*{#strings.defaultString(synopsis,'N.D.')}"></dd>
+        <dt>Number of copies</dt>
+        <dd th:text="*{numberOfCopies}"></dd>
+        <dt>Available copies</dt>
+        <dd th:text="*{availableCopies}"></dd>
+      </dl>
+    </div>
+    <div class="col-4">
+      <h3>Categories</h3>
+      <ul th:if="*{categories.size() > 0}">
+        <li th:each="categoryObj : *{categories}" th:text="${categoryObj.name}"></li>
+      </ul>
+      <div th:unless="*{categories.size() > 0}" class="alert alert-info">The list is empty</div>
+    </div>
   </section>
   <section>
     

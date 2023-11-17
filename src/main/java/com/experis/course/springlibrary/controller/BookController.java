@@ -4,6 +4,7 @@ import com.experis.course.springlibrary.exceptions.BookNotFoundException;
 import com.experis.course.springlibrary.exceptions.ISBNUniqueException;
 import com.experis.course.springlibrary.model.Book;
 import com.experis.course.springlibrary.service.BookService;
+import com.experis.course.springlibrary.service.CategoryService;
 import jakarta.validation.Valid;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,8 @@ public class BookController {
   // attributi
   @Autowired
   private BookService bookService;
+  @Autowired
+  private CategoryService categoryService;
 
 
   // metodo che mostra la lista di tutti i libri
@@ -55,15 +58,17 @@ public class BookController {
   @GetMapping("/create")
   public String create(Model model) {
     model.addAttribute("book", new Book());
+    model.addAttribute("categoryList", categoryService.getAll());
     return "books/form";
   }
 
   @PostMapping("/create")
   public String doCreate(@Valid @ModelAttribute("book") Book formBook,
-      BindingResult bindingResult) {
+      BindingResult bindingResult, Model model) {
     // validare che i dati siano corretti
     if (bindingResult.hasErrors()) {
       // ci sono errori, devo ricaricare il form
+      model.addAttribute("categoryList", categoryService.getAll());
       return "books/form";
     }
     // salvo il libro su database
@@ -85,6 +90,7 @@ public class BookController {
     try {
       // aggiungo il book come attributo del Model
       model.addAttribute("book", bookService.getBookById(id));
+      model.addAttribute("categoryList", categoryService.getAll());
       // proseguo a restituire la pagina di modifica
       return "/books/form";
     } catch (BookNotFoundException e) {
@@ -96,10 +102,11 @@ public class BookController {
   // metodo che riceve il submit del form di edit e salva il libro
   @PostMapping("/edit/{id}")
   public String doEdit(@PathVariable Integer id, @Valid @ModelAttribute("book") Book formBook,
-      BindingResult bindingResult) {
+      BindingResult bindingResult, Model model) {
     // valido il libro
     if (bindingResult.hasErrors()) {
       // se ci sono errori ricarico la pagina col form
+      model.addAttribute("categoryList", categoryService.getAll());
       return "/books/form";
     }
     try {

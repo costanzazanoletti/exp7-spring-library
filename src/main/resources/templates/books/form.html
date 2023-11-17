@@ -16,32 +16,53 @@
       th:object="${book}"
       class="row gy-2"
   >
-    <!-- title -->
-    <div class="col-6"
-         th:insert="fragments/components :: formField('text', 'Title', 'title')"></div>
-    <!-- authors -->
-    <div class="col-6" th:insert="fragments/components :: formField('text', 'Authors', 'authors')">
+    <div class="col-8">
+      <!-- book details -->
+      <div class="row">
+        <!-- title -->
+        <div class="col-6"
+             th:insert="fragments/components :: formField('text', 'Title', 'title')"></div>
+        <!-- authors -->
+        <div class="col-6"
+             th:insert="fragments/components :: formField('text', 'Authors', 'authors')">
+        </div>
+        <!-- publisher -->
+        <div class="col-6"
+             th:insert="fragments/components :: formField('text', 'Publisher', 'publisher')">
+        </div>
+        <!-- isbn -->
+        <div class="col-4" th:insert="fragments/components :: formField('text', 'ISBN', 'isbn')">
+        
+        </div>
+        <!-- year -->
+        <div class="col-2"
+             th:insert="fragments/components :: formField('number', 'Year of publication', 'year')">
+        </div>
+        <div class="col-2"
+             th:insert="fragments/components :: formField('number', 'N. of copies', 'numberOfCopies')">
+        </div>
+        <!-- synopsis -->
+        <div class="col-12">
+          <label for="synopsis" class="form-label">Synopsis</label>
+          <textarea class="form-control" id="synopsis" rows="5" th:field="*{synopsis}"></textarea>
+        </div>
+      </div>
     </div>
-    <!-- publisher -->
-    <div class="col-6"
-         th:insert="fragments/components :: formField('text', 'Publisher', 'publisher')">
+    <div class="col-4">
+      <!--categories -->
+      <h3>Categories</h3>
+      <div class="form-check" th:each="cat : ${categoryList}">
+        <input
+            class="form-check-input"
+            type="checkbox"
+            th:value="${cat.id}"
+            th:id="|cat_${cat.id}|"
+            th:field="*{categories}">
+        <label class="form-check-label" th:for="|cat_${cat.id}|" th:text="${cat.name}">
+        </label>
+      </div>
     </div>
-    <!-- isbn -->
-    <div class="col-4" th:insert="fragments/components :: formField('text', 'ISBN', 'isbn')">
     
-    </div>
-    <!-- year -->
-    <div class="col-2"
-         th:insert="fragments/components :: formField('number', 'Year of publication', 'year')">
-    </div>
-    <div class="col-2"
-         th:insert="fragments/components :: formField('number', 'N. of copies', 'numberOfCopies')">
-    </div>
-    <!-- synopsis -->
-    <div class="col-12">
-      <label for="synopsis" class="form-label">Synopsis</label>
-      <textarea class="form-control" id="synopsis" rows="5" th:field="*{synopsis}"></textarea>
-    </div>
     <!-- actions -->
     <div class="col-12">
       <button class="btn btn-primary" type="submit">Save</button>

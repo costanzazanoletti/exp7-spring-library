@@ -60,6 +60,7 @@ public class BookService {
     bookToEdit.setYear(book.getYear());
     bookToEdit.setSynopsis(book.getSynopsis());
     bookToEdit.setNumberOfCopies(book.getNumberOfCopies());
+    bookToEdit.setCategories(book.getCategories());
 
     return bookRepository.save(bookToEdit);
   }

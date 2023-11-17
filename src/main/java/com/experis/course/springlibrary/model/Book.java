@@ -3,10 +3,12 @@ package com.experis.course.springlibrary.model;
 import com.experis.course.springlibrary.validation.YearPastOrPresent;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Min;
@@ -55,8 +57,11 @@ public class Book {
 
   @Min(0)
   private Integer numberOfCopies;
-  @OneToMany(mappedBy = "book", orphanRemoval = true)
+  @OneToMany(mappedBy = "book", orphanRemoval = true, fetch = FetchType.LAZY)
   private List<Borrowing> borrowings = new ArrayList<>();
+
+  @ManyToMany(fetch = FetchType.LAZY)
+  private List<Category> categories;
 
   public Integer getId() {
     return id;
@@ -138,6 +143,14 @@ public class Book {
     this.borrowings = borrowings;
   }
 
+  public List<Category> getCategories() {
+    return categories;
+  }
+
+  public void setCategories(List<Category> categories) {
+    this.categories = categories;
+  }
+
   // metodo per calcolare un attributo derivato
   public int getAvailableCopies() {
     // togliere dal numero di copie disponibili
@@ -150,5 +163,5 @@ public class Book {
     }
     return numberOfCopies - notReturnedBorrowings;
   }
-  
+
 }
