@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org">
 <head th:insert="fragments/resources :: headResources('Book List')"></head>
 <body>
 <nav th:replace="fragments/navbar :: topNavbar('books')"></nav>
@@ -24,7 +24,7 @@
   </div>
   
   <hr>
-  <div class="my-3">
+  <div class="my-3" sec:authorize="hasAuthority('ADMIN')">
     <a th:href="@{/books/create}" class="btn btn-primary">Add new book</a>
   </div>
   <table class="table">
@@ -48,13 +48,19 @@
       <td class="d-flex align-items-center justify-content-between">
         <a class="btn btn-primary" th:href="@{/books/show/{id}(id=*{id})}" title="details"><i
             class="fa-solid fa-book"></i></a>
-        <a class="btn btn-primary" th:href="@{/books/edit/{id}(id=*{id})}" title="edit"><i
+        <a
+            class="btn btn-primary"
+            th:href="@{/books/edit/{id}(id=*{id})}"
+            title="edit"
+            sec:authorize="hasAuthority('ADMIN')"
+        ><i
             class="fa-solid fa-pen-to-square"></i></a>
         <form
             th:if="*{numberOfCopies == availableCopies}"
             method="POST"
             th:action="@{/books/delete/{id}(id=*{id})}"
             onsubmit="return confirm('Are you sure?')"
+            sec:authorize="hasAuthority('ADMIN')"
         >
           <button type="submit" class="btn btn-primary"><i class="fa-solid fa-trash-can"></i>
           </button>

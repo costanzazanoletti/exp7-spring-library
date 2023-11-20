@@ -1,4 +1,4 @@
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org">
 <body>
 <nav th:fragment="topNavbar(area)" class="navbar navbar-expand-lg bg-primary navbar-dark">
   
@@ -15,16 +15,19 @@
           <a class="nav-link" th:classAppend="${area == 'books' ? 'active' : ''}"
              th:href="@{/books}">Books</a>
         </li>
-        <li class="nav-item">
+        <li class="nav-item" sec:authorize="hasAuthority('ADMIN')">
           <a class="nav-link" th:classAppend="${area == 'users' ? 'active' : ''}"
              th:href="@{/users}">Users</a>
         </li>
-        <li class="nav-item">
+        <li class="nav-item" sec:authorize="hasAuthority('ADMIN')">
           <a class="nav-link" th:classAppend="${area == 'categories' ? 'active' : ''}"
              th:href="@{/categories}">Categories</a>
         </li>
       </ul>
-    
+      <div class="text-light">
+        Hi <span sec:authentication="name"></span>
+        <a th:href="@{/logout}" class="btn btn-light">Logout</a>
+      </div>
     </div>
   </div>
 
