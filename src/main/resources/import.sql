@@ -6,6 +6,9 @@ INSERT INTO categories(name) VALUES('non-fiction');
 INSERT INTO categories(name) VALUES('teenagers');
 INSERT INTO categories(name) VALUES('computer science');
 
+INSERT INTO books_categories(book_id, categories_id) VALUES(1,1);
+INSERT INTO books_categories(book_id, categories_id) VALUES(1,3);
+
 INSERT INTO roles (id, name) VALUES(1, 'ADMIN');
 INSERT INTO roles (id, name) VALUES(2, 'USER');
 

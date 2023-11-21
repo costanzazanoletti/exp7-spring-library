@@ -7,6 +7,8 @@ import com.experis.course.springlibrary.repository.BookRepository;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -30,6 +32,10 @@ public class BookService {
     }
   }
 
+  public List<Book> getBookList() {
+    return bookRepository.findAll();
+  }
+
   // metodo che restituisce un libro preso per id, se non lo trova solleva un'eccezione
   public Book getBookById(Integer id) throws BookNotFoundException {
     Optional<Book> result = bookRepository.findById(id);
@@ -42,6 +48,7 @@ public class BookService {
 
   // metodo per creare un nuovo libro
   public Book createBook(Book book) throws ISBNUniqueException {
+    book.setId(null);
     try {
       return bookRepository.save(book);
     } catch (RuntimeException e) {
@@ -68,5 +75,10 @@ public class BookService {
   // metodo che elimina un libro da database
   public void deleteBook(Integer id) {
     bookRepository.deleteById(id);
+  }
+
+  // metodo che prende in ingresso un Pageable e restituisce la Page di libri
+  public Page<Book> getPage(Pageable pageable) {
+    return bookRepository.findAll(pageable);
   }
 }

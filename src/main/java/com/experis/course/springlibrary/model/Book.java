@@ -1,6 +1,7 @@
 package com.experis.course.springlibrary.model;
 
 import com.experis.course.springlibrary.validation.YearPastOrPresent;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -58,6 +59,7 @@ public class Book {
   @Min(0)
   private Integer numberOfCopies;
   @OneToMany(mappedBy = "book", orphanRemoval = true, fetch = FetchType.LAZY)
+  @JsonIgnore
   private List<Borrowing> borrowings = new ArrayList<>();
 
   @ManyToMany(fetch = FetchType.LAZY)
@@ -152,6 +154,7 @@ public class Book {
   }
 
   // metodo per calcolare un attributo derivato
+
   public int getAvailableCopies() {
     // togliere dal numero di copie disponibili
     // il numero di prestiti che non sono ancora stati ritornati
