@@ -1,32 +1,17 @@
-package com.experis.course.springlibrary.model;
+package com.experis.course.springlibrary.dto;
 
+import com.experis.course.springlibrary.model.Category;
 import com.experis.course.springlibrary.validation.YearPastOrPresent;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Lob;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
-import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.web.multipart.MultipartFile;
 
-@Entity
-@Table(name = "books")
-public class Book {
+public class BookDto {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
+
   private Integer id;
 
   @NotBlank(message = "Title must not be blank")
@@ -43,32 +28,21 @@ public class Book {
 
   @NotBlank(message = "ISBN must not be blank")
   @Size(max = 13, message = "Length must be less than 255")
-  @Column(length = 13, nullable = false, unique = true)
   private String isbn;
 
   @NotNull(message = "Year must not be null")
   @YearPastOrPresent
   private Integer year;
 
-  @CreationTimestamp
-  private LocalDateTime createdAt;
-
-  @Lob
   private String synopsis;
 
   @Min(0)
   private Integer numberOfCopies;
 
-  @Lob
-  @Column(length = 16777215)
-  @JsonIgnore
-  private byte[] cover;
 
-  @OneToMany(mappedBy = "book", orphanRemoval = true, fetch = FetchType.LAZY)
-  @JsonIgnore
-  private List<Borrowing> borrowings = new ArrayList<>();
+  private MultipartFile coverFile;
 
-  @ManyToMany(fetch = FetchType.LAZY)
+
   private List<Category> categories;
 
   public Integer getId() {
@@ -119,14 +93,6 @@ public class Book {
     this.year = year;
   }
 
-  public LocalDateTime getCreatedAt() {
-    return createdAt;
-  }
-
-  public void setCreatedAt(LocalDateTime createdAt) {
-    this.createdAt = createdAt;
-  }
-
   public String getSynopsis() {
     return synopsis;
   }
@@ -143,12 +109,12 @@ public class Book {
     this.numberOfCopies = numberOfCopies;
   }
 
-  public List<Borrowing> getBorrowings() {
-    return borrowings;
+  public MultipartFile getCoverFile() {
+    return coverFile;
   }
 
-  public void setBorrowings(List<Borrowing> borrowings) {
-    this.borrowings = borrowings;
+  public void setCoverFile(MultipartFile coverFile) {
+    this.coverFile = coverFile;
   }
 
   public List<Category> getCategories() {
@@ -158,27 +124,4 @@ public class Book {
   public void setCategories(List<Category> categories) {
     this.categories = categories;
   }
-
-  public byte[] getCover() {
-    return cover;
-  }
-
-  public void setCover(byte[] cover) {
-    this.cover = cover;
-  }
-
-  // metodo per calcolare un attributo derivato
-
-  public int getAvailableCopies() {
-    // togliere dal numero di copie disponibili
-    // il numero di prestiti che non sono ancora stati ritornati
-    int notReturnedBorrowings = 0;
-    for (Borrowing b : borrowings) {
-      if (b.getReturnDate() == null) {
-        notReturnedBorrowings++;
-      }
-    }
-    return numberOfCopies - notReturnedBorrowings;
-  }
-
 }

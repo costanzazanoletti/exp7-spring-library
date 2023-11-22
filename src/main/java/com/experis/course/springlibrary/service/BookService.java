@@ -1,9 +1,11 @@
 package com.experis.course.springlibrary.service;
 
+import com.experis.course.springlibrary.dto.BookDto;
 import com.experis.course.springlibrary.exceptions.BookNotFoundException;
 import com.experis.course.springlibrary.exceptions.ISBNUniqueException;
 import com.experis.course.springlibrary.model.Book;
 import com.experis.course.springlibrary.repository.BookRepository;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,6 +59,53 @@ public class BookService {
     }
   }
 
+  public Book createBook(BookDto bookDto) throws IOException, ISBNUniqueException {
+    // converto il BookDto in Book
+    Book book = convertDtoToBook(bookDto);
+    // chiamo il metodo che salva il Book su db
+    return createBook(book);
+  }
+
+  private static Book convertDtoToBook(BookDto bookDto) throws IOException {
+    Book book = new Book();
+    book.setTitle(bookDto.getTitle());
+    book.setIsbn(bookDto.getIsbn());
+    book.setSynopsis(bookDto.getSynopsis());
+    book.setAuthors(bookDto.getAuthors());
+    book.setPublisher(bookDto.getPublisher());
+    book.setYear(bookDto.getYear());
+    book.setNumberOfCopies(bookDto.getNumberOfCopies());
+    book.setCategories(bookDto.getCategories());
+    book.setId(bookDto.getId());
+    if (bookDto.getCoverFile() != null && !bookDto.getCoverFile().isEmpty()) {
+      // trasformo il MultipartFile in byte[]
+      byte[] bytes = bookDto.getCoverFile().getBytes();
+      book.setCover(bytes);
+    }
+    return book;
+  }
+
+  private static BookDto convertBookToDto(Book book) {
+    BookDto bookDto = new BookDto();
+    bookDto.setTitle(book.getTitle());
+    bookDto.setIsbn(book.getIsbn());
+    bookDto.setSynopsis(book.getSynopsis());
+    bookDto.setAuthors(book.getAuthors());
+    bookDto.setPublisher(book.getPublisher());
+    bookDto.setYear(book.getYear());
+    bookDto.setNumberOfCopies(book.getNumberOfCopies());
+    bookDto.setCategories(book.getCategories());
+    bookDto.setId(book.getId());
+    return bookDto;
+  }
+
+
+  public BookDto getBookDtoById(Integer id) throws BookNotFoundException {
+    // prendo il book da database
+    Book book = getBookById(id);
+    return convertBookToDto(book);
+  }
+
   // metodo per modificare un libro con un id
   public Book editBook(Book book) throws BookNotFoundException {
     Book bookToEdit = getBookById(book.getId());
@@ -68,8 +117,18 @@ public class BookService {
     bookToEdit.setSynopsis(book.getSynopsis());
     bookToEdit.setNumberOfCopies(book.getNumberOfCopies());
     bookToEdit.setCategories(book.getCategories());
+    if (book.getCover() != null && book.getCover().length > 0) {
+      bookToEdit.setCover(book.getCover());
+    }
 
     return bookRepository.save(bookToEdit);
+  }
+
+  public Book editBook(BookDto bookDto) throws IOException {
+    // converto il BookDto in Book
+    Book book = convertDtoToBook(bookDto);
+    // salvo il Book su db
+    return editBook(book);
   }
 
   // metodo che elimina un libro da database

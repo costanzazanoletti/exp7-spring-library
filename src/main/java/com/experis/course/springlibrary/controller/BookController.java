@@ -1,11 +1,13 @@
 package com.experis.course.springlibrary.controller;
 
+import com.experis.course.springlibrary.dto.BookDto;
 import com.experis.course.springlibrary.exceptions.BookNotFoundException;
 import com.experis.course.springlibrary.exceptions.ISBNUniqueException;
 import com.experis.course.springlibrary.model.Book;
 import com.experis.course.springlibrary.service.BookService;
 import com.experis.course.springlibrary.service.CategoryService;
 import jakarta.validation.Valid;
+import java.io.IOException;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -57,13 +59,13 @@ public class BookController {
   // metodo che mostra il form di creazione del book
   @GetMapping("/create")
   public String create(Model model) {
-    model.addAttribute("book", new Book());
+    model.addAttribute("book", new BookDto());
     model.addAttribute("categoryList", categoryService.getAll());
     return "books/form";
   }
 
   @PostMapping("/create")
-  public String doCreate(@Valid @ModelAttribute("book") Book formBook,
+  public String doCreate(@Valid @ModelAttribute("book") BookDto formBook,
       BindingResult bindingResult, Model model) {
     // validare che i dati siano corretti
     if (bindingResult.hasErrors()) {
@@ -81,6 +83,10 @@ public class BookController {
           "ISBN must be unique"));
       // ti rimando alla pagina col form
       return "books/form";
+    } catch (IOException e) {
+      bindingResult.addError(new FieldError("book", "coverFile", null, false, null, null,
+          "Unable to save file"));
+      return "books/form";
     }
   }
 
@@ -89,7 +95,7 @@ public class BookController {
   public String edit(@PathVariable Integer id, Model model) {
     try {
       // aggiungo il book come attributo del Model
-      model.addAttribute("book", bookService.getBookById(id));
+      model.addAttribute("book", bookService.getBookDtoById(id));
       model.addAttribute("categoryList", categoryService.getAll());
       // proseguo a restituire la pagina di modifica
       return "/books/form";
@@ -101,7 +107,7 @@ public class BookController {
 
   // metodo che riceve il submit del form di edit e salva il libro
   @PostMapping("/edit/{id}")
-  public String doEdit(@PathVariable Integer id, @Valid @ModelAttribute("book") Book formBook,
+  public String doEdit(@PathVariable Integer id, @Valid @ModelAttribute("book") BookDto formBook,
       BindingResult bindingResult, Model model) {
     // valido il libro
     if (bindingResult.hasErrors()) {
@@ -114,6 +120,10 @@ public class BookController {
       return "redirect:/books/show/" + savedBook.getId();
     } catch (BookNotFoundException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+    } catch (IOException e) {
+      bindingResult.addError(new FieldError("book", "coverFile", null, false, null, null,
+          "Unable to save file"));
+      return "books/form";
     }
   }
 

@@ -10,7 +10,7 @@
   <h2 class="text-muted" th:text="|written by *{authors}|"></h2>
   <hr>
   <section class="row">
-    <div class="col-8">
+    <div class="col-4">
       <dl>
         <dt>Publisher</dt>
         <dd th:text="*{publisher}"></dd>
@@ -27,6 +27,9 @@
         <dt>Available copies</dt>
         <dd th:text="*{availableCopies}"></dd>
       </dl>
+    </div>
+    <div class="col-4">
+      <img class="img-fluid" th:src="@{/files/cover/{bookId}(bookId=*{id})}" alt="cover">
     </div>
     <div class="col-4">
       <h3>Categories</h3>

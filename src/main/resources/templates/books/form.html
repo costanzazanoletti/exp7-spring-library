@@ -15,6 +15,7 @@
       th:action="@{${actionUrl}}"
       th:object="${book}"
       class="row gy-2"
+      enctype="multipart/form-data"
   >
     <div class="col-8">
       <!-- book details -->
@@ -46,6 +47,12 @@
           <label for="synopsis" class="form-label">Synopsis</label>
           <textarea class="form-control" id="synopsis" rows="5" th:field="*{synopsis}"></textarea>
         </div>
+      </div>
+      <div class="col-12 d-flex align-items-center">
+        <img th:if="${isEdit}" width="100" th:src="@{/files/cover/{id}(id =*{id})}"
+             alt="current cover" class="me-2">
+        <div
+            th:insert="fragments/components :: formField('file', 'Cover image', 'coverFile')"></div>
       </div>
     </div>
     <div class="col-4">
